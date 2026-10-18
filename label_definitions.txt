@@ -5,5 +5,5 @@
 
 hands_on: the writer reports something they ran, tested, or built themselves, with a concrete result someone could check
 factual: the writer backs a point with a checkable fact from outside their own setup, like a spec, version, date, price, or published benchmark
-opinion: a claim, prediction, or judgment with no support offered
+opinion: a claim, prediction, judgment, or reaction with no support offered
 question: the main purpose of the post is to get an answer, advice, or help from other people

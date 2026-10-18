@@ -91,9 +91,13 @@ documentation, or a quoted source), and the fact is what the point rests on.
 
 ### `opinion`
 
-**Definition:** A claim, prediction, or judgment with no support offered.
-Strength of feeling is not support, and neither is "I've used a lot of
-models".
+**Definition:** A claim, prediction, judgment, or reaction with no support
+offered. Strength of feeling is not support, and neither is "I've used a lot
+of models".
+
+(I added "reaction" after the cold pass. Posts like "LOL i didnt know that and
+been using opencode for months" aren't claims, but they aren't anything else
+either, and I'd rather have one clear home for them than argue each one.)
 
 **Example 1:**
 > OpenAI should be held legally accountable. I know they won't be, but they
@@ -154,7 +158,13 @@ mentions. So the post above is `opinion`.
   whichever one the conclusion rests on.
 - **`factual` vs `opinion`:** the fact has to carry the point. If a number is
   decoration on a conclusion the writer already had, it's `opinion` with a
-  number in it.
+  number in it. A technical explanation counts as `factual` when the point
+  rests on specific mechanics you could check in docs ("hot experts go in
+  VRAM, cold ones on the SSD, so random read speed is the bottleneck"). A
+  bare assertion like "lower quants run faster but with lower quality" is
+  `opinion`, even if it's true, because nothing in the post supports it. I
+  added this one after the cold pass too, since explanations turned out to be
+  a big chunk of this sub.
 
 
 
