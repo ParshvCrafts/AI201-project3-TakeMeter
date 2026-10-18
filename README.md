@@ -42,6 +42,15 @@
 <!-- Your community, and what your classifier sorts posts into. Three or four
      sentences. -->
 
+TakeMeter sorts comments from r/LocalLLaMA, the subreddit where people run
+language models on their own hardware, into four kinds: `hands_on` (the writer
+ran something and reports a concrete result), `factual` (the point rests on a
+checkable outside fact), `opinion` (a claim or reaction with nothing behind
+it) and `question`. When I read that sub, the posts worth my time are the ones
+with a real result or a real fact in them, and they're buried under a lot of
+confident takes. The model is DistilBERT fine-tuned on 248 posts I collected
+and labelled, and it trains on my laptop's CPU in a few minutes.
+
 
 
 ---
@@ -55,7 +64,10 @@
      people leave out. Every taxonomy has a hardest boundary. Name yours. -->
 
 Four labels. I started from what I actually saw while reading (see
-[reading_notes.md](reading_notes.md)), not from the example taxonomy.
+[reading_notes.md](reading_notes.md)), not from the example taxonomy. The
+example posts below come from that first reading sample (four days in March,
+May, July and September 2026), which I pulled before building the labelling
+pool, so they aren't rows in `labels.csv`.
 
 ### `hands_on`
 
@@ -175,19 +187,56 @@ mentions. So the post above is `opinion`.
 <!-- Where you collected from, how you labelled, your counts, and three hard
      cases. -->
 
-**Where the posts came from:**
+**Where the posts came from:** Public r/LocalLLaMA comments from January to
+September 2026. Reddit blocks its own JSON pages without a login now, so
+[collect.py](collect.py) reads the Arctic Shift archive, a public mirror of
+Reddit data. It samples 24 short windows spread across those nine months, so
+no single model launch takes over the data. Then it throws out what I couldn't
+label fairly: bots, referral spam, posts with links, quoted replies, code
+blocks, non-English text, posts under 12 words, and posts the model couldn't
+read whole (over 100 words or over 128 tokens). That left 1,242 posts in
+[data/raw_pool.csv](data/raw_pool.csv), with the comment id and permalink for
+each one so any row can be traced back. No usernames are stored.
+`python -m unittest test_collect` runs the 22 tests on those filters.
 
-**How I labelled them:** <!-- Cold first? Pre-labelled with AI and corrected?
-Say so plainly — the disclosure is required, not penalised. -->
+**How I labelled them:**
+
+1. **Cold pass, 20 posts.** I labelled the first one myself. Then I stopped,
+   because I was worried my own takes on which models are good would leak
+   into my labels, and asked Claude to label the other 19 in a single pass
+   with only my definitions, no tools and no second opinion. The note column
+   says which is which (`cold` for mine, `cold, labelled by Claude...` for the
+   rest). That pass is also where I found two gaps and changed my definitions
+   (see the notes under `opinion` and the `factual` vs `opinion` rule).
+2. **AI pre-labelling, 700 posts.** Two separate Claude (Sonnet) sessions
+   labelled the same 700 random posts from the pool, each with my definitions
+   and decision rules and without seeing the other's answers. They agreed on
+   656 of 700 (93.7%).
+3. **The 44 splits** were decided one by one against my rules. Most of them
+   were rule 2 (is a verdict a result?) or rule 4 (is this a mechanism or a
+   bare assertion?).
+4. **Agreed rows were read too.** Two passes agreeing doesn't make them right.
+   Reading the agreed rows in my final set turned up 12 where both passes broke
+   a rule, mostly calling a post `hands_on` when it named a setup but gave no
+   result. Those 12 were changed, and the note column says what each one was
+   before. Two rows got dropped: one started with an escaped Reddit quote my
+   filter missed (fixed in `collect.py`, with a test), and one was French.
+5. **Picking 248 from the labelled pool.** About 61% of real r/LocalLLaMA
+   comments are `opinion` (both passes' raw labels are in
+   [data/prelabel_passes.csv](data/prelabel_passes.csv)), so I kept every hard row and filled each label from
+   the agreed rows up to a target, with `opinion` deliberately the biggest.
+   The tradeoff: this file is more balanced than the sub itself, so on raw
+   threads the model will probably call too few posts `opinion`.
 
 **Counts per label:**
 
 | Label | Count | Share |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-| **Total** |  | 100% |
+| `opinion` | 88 | 35.5% |
+| `factual` | 57 | 23.0% |
+| `question` | 53 | 21.4% |
+| `hands_on` | 50 | 20.2% |
+| **Total** | 248 | 100% |
 
 **Three hard cases**
 
@@ -195,25 +244,45 @@ Say so plainly — the disclosure is required, not penalised. -->
      been, and what you chose. These are worth more than the easy 190. -->
 
 **1.**
-> *The post:*
+> *The post:* "21Gbps/8(gigabyte)=2.625GB/s for RTX 4090. Qwen3.6 27B
+> IQ4_NL = 16.1GB (Isn't an Active Weight model). So... 16.1/2.625=6.1
+> Tokens/s. 6.1*8= 48.8Tokens/s. Oh wow it's right I get around 50t/s with
+> that model. It's a joke."
 >
-> *Could have been:*
+> *Could have been:* `factual` or `hands_on`. It has a spec-sheet calculation
+> and a number from the writer's own machine.
 >
-> *I chose, because:*
+> *I chose, because:* `factual`. My rule for this boundary is "whichever the
+> conclusion rests on". Almost the whole post is the bandwidth math, and the
+> 50 t/s from their own run only confirms it. If they had led with "I get 50
+> t/s" and then explained it, I'd have gone the other way.
 
 **2.**
-> *The post:*
+> *The post:* "The old functionality in the chat UI only transcribed text, if
+> you gave it an image of something other than a document it wouldn't be able
+> to describe it. From the other user's post above it looks like it's
+> changed?"
 >
-> *Could have been:*
+> *Could have been:* `question`, `hands_on` (it describes how the tool
+> behaved for them) or `opinion`. This one could go three ways.
 >
-> *I chose, because:*
+> *I chose, because:* `question`. Rule 1 comes first: the writer actually
+> wants to know whether it changed. The first sentence is the context for the
+> question, not a result being reported.
 
 **3.**
-> *The post:*
+> *The post:* "This is the top open weight model. Still weak on code reviews
+> (same for other Chinese models). Lots of false positives and over
+> exaggeration on severity. It’s like all these models were optimized for
+> beating benchmarks."
 >
-> *Could have been:*
+> *Could have been:* `hands_on` or `opinion`. That's my hardest boundary.
+> "False positives and over exaggeration on severity" sounds like something
+> they saw.
 >
-> *I chose, because:*
+> *I chose, because:* `opinion`. The post never says the writer ran anything,
+> and there's no specific result, just a general description of how the model
+> behaves. The two AI passes split on this one too.
 
 ---
 
@@ -221,15 +290,69 @@ Say so plainly — the disclosure is required, not penalised. -->
 
 <!-- Your starting model, your settings, and anything you changed and why. -->
 
-**Base model:**
+**Base model:** `distilbert-base-uncased`
 
-**Settings:** <!-- epochs, learning rate, batch size, seed -->
+**Settings:** 3 epochs, learning rate 2e-5, batch size 16, 128 tokens per
+post, seed 42.
 
-**Anything I changed from the defaults, and why:**
+**Where it ran:** CPU (`device: cpu`, torch `2.14.1+cpu`, Windows 11 laptop).
+`results.json` records the same thing.
 
-**Split sizes:** <!-- train / val / test, and per-label counts in the test
-split. If a label had fewer than about 8 in test, say so — it explains a lot
-of next unit's variance. -->
+**Anything I changed from the defaults, and why:** Nothing for the main run.
+`results.json` and `test_split.csv` come from the notebook exactly as given,
+with only `LABELS` set to my four. The second run below is a stretch, kept in
+its own file.
+
+**Split sizes:** 172 train / 38 val / 38 test.
+
+| Label | Train | Val | Test |
+|---|---|---|---|
+| `hands_on` | 34 | 8 | 8 |
+| `factual` | 39 | 9 | 9 |
+| `opinion` | 62 | 13 | 13 |
+| `question` | 37 | 8 | 8 |
+
+No label is under 8 in test, but `hands_on` and `question` sit right at 8.
+For those two, one post is worth about 0.06 of F1, so I expect them to move
+the most between seeds next unit.
+
+### Stretch features
+
+What I'm adding, and what I'm skipping:
+
+- **A fourth label (done).** `question` came straight out of the reading.
+  About one post in seven in the pool is a question, and forcing those into
+  `opinion` would have made `opinion` meaningless.
+- **A second run with one hyperparameter changed (done).** Epochs 3 → 10,
+  same seed, same split. [run2_epochs.py](run2_epochs.py) runs the notebook in
+  memory with that one change, checks the test split didn't move, and writes
+  [results_run2_epochs10.json](results_run2_epochs10.json).
+- **50 extra examples for the thinnest label (skipped).** My thinnest label
+  has 50 rows, and the pool already has more of each label. Adding them would
+  mean another labelling round for a label that isn't my real problem yet.
+  The run below says the problem is training steps, not data.
+
+**What moved in the second run:**
+
+| | 3 epochs | 10 epochs |
+|---|---|---|
+| Accuracy | 0.368 | 0.526 |
+| Macro F1 | 0.181 | 0.485 |
+| F1 `hands_on` | 0.182 | 0.400 |
+| F1 `factual` | 0.000 | 0.167 |
+| F1 `opinion` | 0.542 | 0.667 |
+| F1 `question` | 0.000 | 0.706 |
+
+With 3 epochs the model called 35 of the 38 test posts `opinion`. It never
+left the "guess the biggest label" stage. 172 posts at batch 16 is 11 steps
+an epoch, so 3 epochs is only 33 steps. With 10 epochs `question` went from
+0.00 to 0.71, which is what I expected from a label with such obvious surface
+cues. Validation loss was still dropping at epoch 10 (1.357 → 0.970), so it
+wasn't overfitting yet. The new weak spot surprised me: 5 of the 9 `factual`
+posts got called `hands_on`. Both are full of numbers and model names, and the
+model hasn't learned that what matters is where the number came from. I'm
+keeping the notebook on its defaults for now. Changing the epochs is a better
+fit for next unit's improvement step, where I can do it on purpose.
 
 
 
@@ -246,17 +369,44 @@ of next unit's variance. -->
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I gave Claude my four definitions and asked for eight
+  r/LocalLLaMA-style posts sitting right on the boundaries, without saying
+  which label was right.
+- *What came back:* Two of them broke my `hands_on` definition as I'd first
+  written it: "Ran Qwen3 32B Q4 on my 3090 for a week of coding tasks.
+  Honestly it's just the best local coder right now" and "I tried a bunch of
+  quants and settled on Q5_K_M. It just feels smarter to me." Both name a real
+  setup, so my first definition (report something you ran and what happened)
+  let them in. But "best" and "feels smarter" aren't results.
+- *What I changed:* I rewrote `hands_on` to require a concrete result someone
+  could check, and wrote my hardest-boundary rule around that: naming the
+  hardware isn't enough. The same check decided my borderline post. I also
+  asked for the strongest case for `hands_on` and for `opinion` on it, and the
+  `opinion` case ("the tinkering is mentioned only as credentials") was the
+  stronger one under the rewritten definition.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* For my five criteria, one reason each target might be
+  too easy and one it might be too hard, and whether a stranger could check
+  each one from `results.json` alone.
+- *What came back:* The numbers were fine, but criterion 5 wasn't checkable.
+  I wrote "measured from the confusion counts" without saying which way the
+  matrix runs or what the denominator is. It also pointed out that criterion
+  4's thirds move in steps of about 0.083 with 12 posts each, so 0.15 really
+  means "at least two more right".
+- *What I changed:* I kept every number. I rewrote criterion 5 with the exact
+  formula (`confusion["hands_on"]["opinion"] / sum(confusion["hands_on"].values())`),
+  pinned criterion 4 to the notebook's own thirds, and said at the top which
+  file holds the per-seed numbers.
 
-**Pre-labelling disclosure:**
+**Pre-labelling disclosure:** 228 of my 248 rows were pre-labelled by AI
+(two independent Claude Sonnet sessions over the same 700 posts). The 44
+posts where the two disagreed were decided against my written rules, and the
+agreed rows in the final set were read, with 12 corrected. All of that review
+was done with Claude as my coding assistant, working from my definitions and
+decision rules. 19 of the 20 cold rows were also labelled by Claude, at my
+request. Every row's note says how it was labelled.
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
