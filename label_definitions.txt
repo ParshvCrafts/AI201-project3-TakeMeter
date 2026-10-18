@@ -2,9 +2,8 @@
 #
 # Copy these from your README so the baseline is judged on exactly the
 # definitions you wrote. baseline.py reads this file.
-#
-# Delete the examples below and put yours in.
 
-analysis: makes an argument backed by a specific, checkable fact
-hot_take: a confident claim with no support offered
-reaction: an immediate response to something that just happened
+hands_on: the writer reports something they ran, tested, or built themselves, with a concrete result someone could check
+factual: the writer backs a point with a checkable fact from outside their own setup, like a spec, version, date, price, or published benchmark
+opinion: a claim, prediction, or judgment with no support offered
+question: the main purpose of the post is to get an answer, advice, or help from other people

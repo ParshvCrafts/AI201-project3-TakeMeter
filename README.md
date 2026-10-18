@@ -54,33 +54,107 @@
      The decision rule is worth a point on its own and it's the thing most
      people leave out. Every taxonomy has a hardest boundary. Name yours. -->
 
-### `label_one`
+Four labels. I started from what I actually saw while reading (see
+[reading_notes.md](reading_notes.md)), not from the example taxonomy.
 
-**Definition:**
+### `hands_on`
 
-**Example 1:**
->
-
-**Example 2:**
->
-
-### `label_two`
-
-**Definition:**
+**Definition:** The writer reports something they ran, tested, or built
+themselves, and gives a concrete result someone else could check (a speed, a
+memory number, an error, a specific thing the model did or failed to do).
 
 **Example 1:**
->
+> Hmm, i tried with gpt oss, I asked it to output the full reasoning of
+> earlier turns exactly, eord for word, and it was able to do that
 
 **Example 2:**
->
+> Flash Next is now gated from tensor because it was causing a test to fail.
+> Not sure if that helps. Prior to that I had it running and it was odd how
+> it loaded making it too inefficient for my cards to get reasonable context
+> size. I forget what it was doing precisely, but every other card had a copy
+> of the same thing piled on top of the rest of the assigned weights. Someone
+> smarter than me might know what that was.
+
+### `factual`
+
+**Definition:** The writer backs a point with a checkable fact from outside
+their own setup (a spec, version, release date, price, published benchmark,
+documentation, or a quoted source), and the fact is what the point rests on.
+
+**Example 1:**
+> GLM-5 training began in December 2025. The researchers can't pull data from
+> the future.
+
+**Example 2:**
+> I think you got the colors mixed up (understandably) - the 9B is almost as
+> good as the 35B-A3B, not the 122.
+
+### `opinion`
+
+**Definition:** A claim, prediction, or judgment with no support offered.
+Strength of feeling is not support, and neither is "I've used a lot of
+models".
+
+**Example 1:**
+> OpenAI should be held legally accountable. I know they won't be, but they
+> should be
+
+**Example 2:**
+> this is just a pedantic nerd argument. u both believe the same thing,
+> because spoiler alert, it's COMMON SENSE
+
+### `question`
+
+**Definition:** The main purpose of the post is to get an answer, advice, or
+help from other people.
+
+**Example 1:**
+> How do you define distillation? I always assumed parent/teacher training
+> where the student was trained off the logits of the parent. It seems most
+> just mean fine tuning off some output.
+
+**Example 2:**
+> this model looks like it's a little to small for a macbook air m4 24gb of
+> ram, right? but the 27 and 30B version seems too heavy
 
 ### The hardest boundary
 
-**Which two labels:**
+**Which two labels:** `hands_on` vs `opinion`.
+
+The post that made me write this rule:
+
+> Both 27B and 35B v3.5 models seem to be more focused than the v3.6 models.
+> I've spent countless hours (hobby) tinkering with params, different quants
+> and quant providers and I've just settled on the conclusion that 3.5 is just
+> generally better for me. Hell, I've found that v3.5 9B is a beast for most
+> text processing and general chat.
+
+It names real models and says the writer spent hours on them, so it feels like
+`hands_on`. But the only results it gives are "more focused", "better" and "a
+beast", which are verdicts, not results.
 
 **The decision rule I used every time:**
-<!-- e.g. "If the post names a specific checkable fact, it's `analysis`, even
-     if the tone is heated." -->
+
+Naming the model, the quant, or the hardware is not enough. If the post gives a
+concrete result from the writer's own run (a number, an error, a specific thing
+the model did or didn't do), it's `hands_on`, even if it ends with a strong
+verdict. If the only "result" is a verdict like better, smarter, faster, more
+focused, or a beast, it's `opinion`, no matter how many hours of tinkering it
+mentions. So the post above is `opinion`.
+
+**Three smaller rules for the other boundaries:**
+
+- **`question` vs anything:** if the post asks something and the writer
+  actually wants the answer, it's `question`, even if it opens with a
+  paragraph about their setup. That paragraph is context for the question.
+  Rhetorical questions ("who even uses Ollama anymore?") don't count.
+- **`hands_on` vs `factual`:** where does the support come from? The writer's
+  own run means `hands_on`. A spec sheet, a release note, a published number
+  or someone else's benchmark means `factual`. If a post has both, I go with
+  whichever one the conclusion rests on.
+- **`factual` vs `opinion`:** the fact has to carry the point. If a number is
+  decoration on a conclusion the writer already had, it's `opinion` with a
+  number in it.
 
 
 
