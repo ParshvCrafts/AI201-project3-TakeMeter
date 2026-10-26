@@ -739,7 +739,7 @@ ahead of time, using the same three lines.
 
 **What the pattern in my disagreements tells me:** There aren't any yet, so I
 can't claim a pattern from disagreements. What I can say is where the
-pressure is. Four of the six close calls are rule 1 (does the number carry the
+pressure is. Five of the six close calls turn on rule 1 (does the number carry the
 argument?), and the hardest of those are posts where the number comes from
 the writer's own running. That's the same shape as my own hardest boundary,
 `hands_on` vs `opinion`, where the question is whether a personal result is
