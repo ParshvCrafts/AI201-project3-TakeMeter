@@ -420,21 +420,52 @@ request. Every row's note says how it was labelled.
 <!-- Both models on the same posts. `python baseline.py --trained results.json`
      prints this table for you. -->
 
+Both scored on the same 38 posts in `test_split.csv` (seed 42). The baseline
+is `facebook/bart-large-mnli`, zero-shot, given only the four definitions in
+`label_definitions.txt`. The trained column is `results.json` from unit 5
+(3 epochs, the notebook defaults).
+
 | Measure | Baseline | Trained | Difference |
 |---|---|---|---|
-| Overall accuracy |  |  |  |
-| Macro F1 |  |  |  |
-| F1 — `label_one` |  |  |  |
-| F1 — `label_two` |  |  |  |
+| Overall accuracy | 0.316 | 0.368 | +0.053 |
+| Macro F1 | 0.252 | 0.181 | -0.071 |
+| F1 — `factual` | 0.389 | 0.000 | -0.389 |
+| F1 — `hands_on` | 0.353 | 0.182 | -0.171 |
+| F1 — `opinion` | 0.267 | 0.542 | +0.275 |
+| F1 — `question` | 0.000 | 0.000 | +0.000 |
 
-**What I predicted before I looked:**
-<!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
-     prediction made afterwards isn't one. -->
+**What I predicted before I looked:** I think the zero-shot baseline will beat
+my 3-epoch model on accuracy, because my model mostly guesses `opinion`; the
+only place the trained model might win is `opinion` F1.
 
-**What the gap actually means:**
-<!-- If the baseline matched your trained model, your fine-tuning added
-     nothing — and that is a real finding, not a failure. Say it plainly. -->
+I was half right. The trained model only wins on `opinion` F1, like I said. But
+it also wins on accuracy, and I didn't see that coming. The reason is a little
+embarrassing for both models: 13 of the 38 test posts are `opinion`, so always
+guessing `opinion` already scores 0.342. My model is barely above that, and
+the baseline is below it.
 
+**What the gap actually means:** The gap in accuracy doesn't mean my
+fine-tuning learned anything. My model wins on accuracy only because the
+test set has more `opinion` posts than anything else, and it loses on macro
+F1 and on three of the four labels. The baseline at least spreads its guesses
+around: it called 27 of the 38 posts `factual`, which is why it gets 0.78
+recall on `factual` with only 0.26 precision. Neither model is useful yet.
+
+**What my definitions were worth:** I ran the baseline a second time with no
+definitions file, so it only saw the bare label names
+(`baseline_results_bare_names.json`). It scored **0.342 accuracy and 0.300
+macro F1**, higher than with my definitions (0.316 and 0.252). The biggest
+change was `question`: 0.43 F1 with the bare name, 0.00 with my definition. I
+looked at why. `baseline.py` puts each definition into the sentence
+`"This post is {}."`, so my `question` definition turns into "This post is the
+main purpose of the post is to get an answer, advice, or help from other
+people." That isn't a sentence, and the model can't match a post to it. So my
+definitions were worth about -0.03 accuracy to this model. That's not because
+they're wrong for a human reader. They were written as rules for me, not as
+something that fits after "This post is". I left them as they are, because the
+brief says the baseline uses the definitions from my README, and rewriting
+them to suit the opponent would be tuning the opponent. The run with
+definitions is the one I report above.
 
 
 ---
@@ -444,30 +475,64 @@ request. Every row's note says how it was labelled.
 <!-- Five criteria across three seeds. The notebook's section 6 prints the
      spread table; the Target and Verdict columns are yours. -->
 
+Notebook defaults (3 epochs, lr 2e-5, batch 16, 128 tokens), seeds 42, 7 and
+2024, 38 test posts per seed. **Device: CPU** (`cpu`, torch `2.14.1+cpu`,
+Windows 11 laptop), recorded in every entry of
+`results_three_seeds_before.json`. Seed 42 reproduced my unit 5
+`results.json` exactly (0.368), so the CPU runs are deterministic.
+
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | ≥ 0.60 | 0.368 | 0.342 | 0.368 | MISSED |
+| 2. Every label F1 (lowest shown) | ≥ 0.45 | 0.000 | 0.000 | 0.000 | MISSED |
+| 3. F1 on `question` | ≥ 0.80 | 0.000 | 0.000 | 0.000 | MISSED |
+| 4. Most-confident third minus least-confident third | ≥ +0.15 | +0.500 (0.667 vs 0.167) | +0.500 (0.583 vs 0.083) | +0.667 (0.750 vs 0.083) | MET |
+| 5. Real `hands_on` called `opinion` | ≤ 30% | 88% (7/8) | 100% (8/8) | 100% (8/8) | MISSED |
+
+The full spread, from section 6:
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.368 | 0.342 | 0.368 | 0.026 |
+| Macro F1 | 0.181 | 0.127 | 0.202 | 0.075 |
+| F1 — `hands_on` | 0.182 | 0.000 | 0.000 | 0.182 |
+| F1 — `factual` | 0.000 | 0.000 | 0.286 | 0.286 |
+| F1 — `opinion` | 0.542 | 0.510 | 0.522 | 0.032 |
+| F1 — `question` | 0.000 | 0.000 | 0.000 | 0.000 |
+
+Accuracy only moved 0.026 across seeds, so by the notebook's rule this is
+stable. But it's stable for a bad reason. All three seeds made the same
+mistake: they guessed `opinion` for 35, 38 and 33 of the 38 posts. A model
+that always gives the same answer will score about the same on any split.
 
 ### Confusion matrix
 
-<!-- ⚠️ TYPED AS A MARKDOWN TABLE. The notebook prints one ready to paste.
-     An image of a matrix earns nothing. -->
+Seed 42, exactly as section 7 prints it (rows are my labels, columns are the
+model's guesses):
 
-| true \ predicted |  |  |  |
-|---|---|---|---|
-| **** |  |  |  |
-| **** |  |  |  |
-| **** |  |  |  |
+| true \ predicted | hands_on | factual | opinion | question |
+|---|---|---|---|---|
+| **hands_on** | 1 | 0 | 7 | 0 |
+| **factual** | 2 | 0 | 7 | 0 |
+| **opinion** | 0 | 0 | 13 | 0 |
+| **question** | 0 | 0 | 8 | 0 |
 
-**My biggest off-diagonal number, and what it means:**
-<!-- Not "the model made mistakes" — WHICH boundary it didn't learn, and which
-     direction. "7 real analysis posts were called hot_take and only 3 went the
-     other way" is a direction, not just an error rate. -->
+Section 7 only shows one seed, so I also added up all three (114 posts). The
+pattern is the same:
 
+| true \ predicted | hands_on | factual | opinion | question |
+|---|---|---|---|---|
+| **hands_on** | 1 | 0 | 23 | 0 |
+| **factual** | 2 | 2 | 23 | 0 |
+| **opinion** | 0 | 1 | 38 | 0 |
+| **question** | 0 | 2 | 22 | 0 |
+
+**My biggest off-diagonal number, and what it means:** 7 real `hands_on` posts
+were called `opinion` and 0 went the other way, and `factual` and `question`
+lose 7 and 8 posts to `opinion` the same way. So this isn't the model mixing
+up one pair of labels. Everything flows into one column, which means it
+never learned to tell my labels apart at all and fell back on my biggest
+label.
 
 
 ---

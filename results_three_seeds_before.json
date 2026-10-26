@@ -1,0 +1,209 @@
+[
+  {
+    "seed": 42,
+    "n_test": 38,
+    "accuracy": 0.3684210526315789,
+    "f1_macro": 0.1808712121212121,
+    "per_label": {
+      "hands_on": {
+        "precision": 0.3333333333333333,
+        "recall": 0.125,
+        "f1": 0.18181818181818182,
+        "support": 8
+      },
+      "factual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 9
+      },
+      "opinion": {
+        "precision": 0.37142857142857144,
+        "recall": 1.0,
+        "f1": 0.5416666666666666,
+        "support": 13
+      },
+      "question": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      }
+    },
+    "confusion": {
+      "hands_on": {
+        "hands_on": 1,
+        "factual": 0,
+        "opinion": 7,
+        "question": 0
+      },
+      "factual": {
+        "hands_on": 2,
+        "factual": 0,
+        "opinion": 7,
+        "question": 0
+      },
+      "opinion": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 13,
+        "question": 0
+      },
+      "question": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 8,
+        "question": 0
+      }
+    },
+    "confidence": {
+      "mean_when_right": 0.31371021270751953,
+      "mean_when_wrong": 0.29493165016174316,
+      "accuracy_most_confident_third": 0.6666666666666666,
+      "accuracy_least_confident_third": 0.16666666666666666,
+      "n_per_third": 12
+    },
+    "device": "cpu",
+    "device_name": "CPU",
+    "torch_version": "2.14.1+cpu",
+    "max_length": 128
+  },
+  {
+    "seed": 7,
+    "n_test": 38,
+    "accuracy": 0.34210526315789475,
+    "f1_macro": 0.12745098039215685,
+    "per_label": {
+      "hands_on": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      },
+      "factual": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 9
+      },
+      "opinion": {
+        "precision": 0.34210526315789475,
+        "recall": 1.0,
+        "f1": 0.5098039215686274,
+        "support": 13
+      },
+      "question": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      }
+    },
+    "confusion": {
+      "hands_on": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 8,
+        "question": 0
+      },
+      "factual": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 9,
+        "question": 0
+      },
+      "opinion": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 13,
+        "question": 0
+      },
+      "question": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 8,
+        "question": 0
+      }
+    },
+    "confidence": {
+      "mean_when_right": 0.34610095620155334,
+      "mean_when_wrong": 0.3268832862377167,
+      "accuracy_most_confident_third": 0.5833333333333334,
+      "accuracy_least_confident_third": 0.08333333333333333,
+      "n_per_third": 12
+    },
+    "device": "cpu",
+    "device_name": "CPU",
+    "torch_version": "2.14.1+cpu",
+    "max_length": 128
+  },
+  {
+    "seed": 2024,
+    "n_test": 38,
+    "accuracy": 0.3684210526315789,
+    "f1_macro": 0.20186335403726707,
+    "per_label": {
+      "hands_on": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      },
+      "factual": {
+        "precision": 0.4,
+        "recall": 0.2222222222222222,
+        "f1": 0.2857142857142857,
+        "support": 9
+      },
+      "opinion": {
+        "precision": 0.36363636363636365,
+        "recall": 0.9230769230769231,
+        "f1": 0.5217391304347826,
+        "support": 13
+      },
+      "question": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      }
+    },
+    "confusion": {
+      "hands_on": {
+        "hands_on": 0,
+        "factual": 0,
+        "opinion": 8,
+        "question": 0
+      },
+      "factual": {
+        "hands_on": 0,
+        "factual": 2,
+        "opinion": 7,
+        "question": 0
+      },
+      "opinion": {
+        "hands_on": 0,
+        "factual": 1,
+        "opinion": 12,
+        "question": 0
+      },
+      "question": {
+        "hands_on": 0,
+        "factual": 2,
+        "opinion": 6,
+        "question": 0
+      }
+    },
+    "confidence": {
+      "mean_when_right": 0.3348767161369324,
+      "mean_when_wrong": 0.30823495984077454,
+      "accuracy_most_confident_third": 0.75,
+      "accuracy_least_confident_third": 0.08333333333333333,
+      "n_per_third": 12
+    },
+    "device": "cpu",
+    "device_name": "CPU",
+    "torch_version": "2.14.1+cpu",
+    "max_length": 128
+  }
+]
