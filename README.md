@@ -544,13 +544,61 @@ label.
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Overall accuracy | ≥ 0.60, every seed | MISSED | Best seed was 0.368. No seed got within 0.23 of the line |
+| 2 | Every label F1 | ≥ 0.45, every seed | MISSED | Every seed has at least two labels at 0.000. The best minority-label score anywhere was 0.286 (`factual`, seed 2024) |
+| 3 | F1 on `question` | ≥ 0.80, every seed | MISSED | 0.000 on all three. The model never guessed `question` once |
+| 4 | Confident third beats unsure third | ≥ +0.15, every seed | MET | Gaps of +0.500, +0.500 and +0.667, all well above the line. But see below on what it's measuring |
+| 5 | Real `hands_on` called `opinion` | ≤ 30%, every seed | MISSED | 88%, 100%, 100%. The limit allowed 2 of 8; the model lost 7 or 8 |
+
+**Arguing against my one MET.** Criterion 4 passes by a lot, so I tried to
+argue it should be MISSED. The best case: the model calls almost everything
+`opinion`, so the "most confident third" is just the twelve posts that look
+the most like `opinion`, and most of those really are `opinion`. The gap
+shows that confidence tracks "how opinion-like is this", not that the model
+knows when it's right about my four labels. I still call it MET, because the
+criterion says exactly what it measures and all three seeds clear it by more
+than three times the margin. Changing the verdict because I don't like why it
+passed would be the same mistake as lowering a target I missed. What I take
+from it: the criterion is only meaningful once the model predicts more than
+one label, so I check it again after the improvement.
 
 **Diagnoses**
+
+All four misses have one main cause, and I can show it from three places.
+
+**Main cause: the model never trained long enough to leave the "guess the
+biggest label" stage.** This is the "training" cause, not a labelling or
+data-size cause.
+- *The matrix:* every off-diagonal number sits in the `opinion` column. Over
+  three seeds, 23 of 24 `hands_on`, 23 of 27 `factual` and 22 of 24
+  `question` posts were called `opinion`. A labelling problem shows up as
+  confusion between two specific labels. This isn't that. It's one label
+  absorbing everything.
+- *The seeds:* three different splits produced almost the same wrong
+  answer (accuracy spread 0.026). If the problem were which posts landed in
+  test, the seeds would disagree.
+- *The arithmetic:* 172 training posts at batch 16 is 11 steps per epoch, so
+  3 epochs is 33 updates. In unit 5, the same seed with 10 epochs still had
+  validation loss falling at the last epoch (1.357 → 0.970) and `question` went
+  from 0.00 to 0.71. That's what a model that hasn't finished learning looks
+  like.
+
+**Why I don't think it's my labels (for criteria 1-3):** `question` gets
+0.000 on every seed, and it's my cleanest label. The two pre-labelling passes
+only split on 11 posts involving `question` out of 700, and the stand-in
+agreement check shows the rules can be applied consistently. If even the label
+with the obvious "?" cue is ignored, labelling isn't what's holding the model
+back.
+
+**Criterion 5 has a second cause underneath the first.** `hands_on` →
+`opinion` is the exact pair my two pre-labelling passes disagreed on most (17
+of the 44 split rows). The agreement work also shows that "does the
+personal number carry the claim?" is where careful labelers split. So even
+after the model trains properly, I expect this boundary to stay the weakest,
+because the training data itself has the most mixed signal there. The
+improvement run below is the test: if more training fixes criteria 1-3 but
+`hands_on` → `opinion` stays high, the remaining problem is my labels and
+the boundary, not the training.
 
 <!-- For each miss: the cause, and how you know. The four common causes are:
      too few examples for a label, a boundary you applied inconsistently, a
@@ -573,14 +621,33 @@ label.
      data/staff_taxonomy.md, not your own — so every argument below is made
      from those definitions and those decision rules. -->
 
-**Agreement rate:** ___ / 30 = ___%
+**Where the other side came from:** I don't have `data/staff_labels.csv` yet.
+It comes from the TF, and it isn't in the public starter repo. So I didn't
+leave this section empty. I ran the check against a stand-in second rater
+instead: a separate Claude session that got only `data/staff_taxonomy.md` and
+`data/staff_posts.csv`, never saw my labels, and wrote
+`data/second_rater_labels.csv`. My own labels are in `my_staff_labels.csv`.
+When the real file arrives, `python agreement.py` re-runs this against it and
+overwrites `agreement_results.json`.
 
-<!-- Nobody grades this number. A 60% who argues every disagreement from the
-     stated rules beats a 95% who wrote "staff was right" nine times. Several
-     of the 30 were chosen because they're genuinely ambiguous — you should be
-     winning some of these. -->
+```
+python agreement.py --staff-labels data/second_rater_labels.csv
+```
+
+**Agreement rate:** 30 / 30 = 100% (against the stand-in rater, not staff)
+
+I don't trust that 100% as much as it looks. Two AI labelers reading the same
+written rules will tend to make the same calls, so this number says the rules
+can be applied consistently. It doesn't say they get applied the way staff
+apply them. Staff say a rate in the 70s is normal, so I expect to lose some
+of these once the real file is in.
 
 **Disagreements**
+
+None against the stand-in. Both of us came out 10 / 10 / 10. The second rater
+did flag nine posts where it thought a second label was defensible. Those are
+the ones I'd expect staff to split on, so I adjudicated the six closest ones
+ahead of time, using the same three lines.
 
 <!-- Three lines each: the post, both labels, and who you think is right and
      why — grounded in the staff definitions you were both applying.
@@ -595,25 +662,75 @@ label.
      written rule two different ways on 30 posts, that is direct evidence about
      what you did across your own 200. -->
 
-**1.**
-> *The post:*
+**1. sp_002**
+> *The post:* "I tracked sleep against session quality for eleven weeks. Under seven hours the next day's intervals were 6-8 seconds per mile slower, every time bar one. Small sample, one runner, but it's consistent enough that I've stopped scheduling hard days after late shifts."
 >
-> *Staff said / I said:*
+> *Second rater said / I said:* `analysis` / `analysis`. Close alternative: `reaction`, because it's about the writer's own running.
 >
-> *My call, and why:*
+> *My call, and why:* `analysis`. The 6-8 seconds per mile is the whole reason for the decision at the end, so rule 1 says it's load-bearing. Rule 3 says being personal or recent doesn't outrank that. The one thing the rules don't settle is whether the writer's own log counts as "checkable". The definition lists "a stat, a time", but it doesn't say whose.
 >
-> *Which pile:*
+> *Which pile:* (b) if staff disagree. The definition never says whether your own measurements count as a checkable fact.
 
-**2.**
-> *The post:*
+**2. sp_005**
+> *The post:* "Carbon plates aren't the whole story. My times dropped 2% in the shoes and another 2% the following year in the same pair, when the only thing that changed was going from 35 to 50 miles a week."
 >
-> *Staff said / I said:*
+> *Second rater said / I said:* `analysis` / `analysis`. Close alternative: `hot_take`, because it opens with the conclusion.
 >
-> *My call, and why:*
+> *My call, and why:* `analysis`. Opening with the conclusion is not what rule 1 checks. Rule 1 asks whether the number is the reason. Here the second 2% with the same shoes is the reason. Take it out and the claim falls over. That's the opposite of the "times are down 3%" flourish in the rule's own example.
 >
-> *Which pile:*
+> *Which pile:* (c). I'd argue this one and expect to win it.
 
-**What the pattern in my disagreements tells me:**
+**3. sp_010**
+> *The post:* "Three of us ran the same session on the same day, different shoes, within 10 seconds of each other over 5 miles. I'm not saying shoes do nothing, but whatever they do was smaller than the noise between three people."
+>
+> *Second rater said / I said:* `analysis` / `analysis`. Close alternative: `hot_take`.
+>
+> *My call, and why:* `analysis`. The claim is small and comes after the evidence ("smaller than the noise"), and the 10 seconds across three runners is exactly the evidence for it. Three people is a weak sample, but the definition asks whether the fact does work in the argument, not whether the study is good.
+>
+> *Which pile:* (c).
+
+**4. sp_014**
+> *The post:* "Times are down about 3% since the shoe rules changed, so obviously the shoes are the whole story and the sport has a problem."
+>
+> *Second rater said / I said:* `hot_take` / `hot_take`. Close alternative: `analysis`, because it has a stat.
+>
+> *My call, and why:* `hot_take`. This is close to the rule 1 example word for word. "Obviously" gives it away: the conclusion was already there, and the 3% decorates it. Nothing links the 3% to the shoes except the timing.
+>
+> *Which pile:* (a) if anyone labels it `analysis`. The rule covers it directly.
+
+**5. sp_027**
+> *The post:* "Wind was so bad on the out section I was leaning at about 20 degrees. Coming back felt like cheating."
+>
+> *Second rater said / I said:* `reaction` / `reaction`. Close alternative: `analysis`, because of the number.
+>
+> *My call, and why:* `reaction`. The 20 degrees isn't supporting any argument. It's describing how the run felt. Rule 1 only cares about numbers that carry an argument, and this post doesn't make one. Rule 2 then puts it in `reaction`: it's about what just happened to the writer.
+>
+> *Which pile:* (c).
+
+**6. sp_013**
+> *The post:* "The club needs to stop pretending the Tuesday session is for everyone. It isn't and it never has been."
+>
+> *Second rater said / I said:* `hot_take` / `hot_take`. Close alternative: `reaction`, because it sounds annoyed.
+>
+> *My call, and why:* `hot_take`. Rule 2 says "a post can be heated and still be hot_take if it is making a general claim". This one is about the club and the session, not something that just happened to the writer.
+>
+> *Which pile:* (a) if anyone labels it `reaction`.
+
+**What the pattern in my disagreements tells me:** There aren't any yet, so I
+can't claim a pattern from disagreements. What I can say is where the
+pressure is. Four of the six close calls are rule 1 (does the number carry the
+argument?), and the hardest of those are posts where the number comes from
+the writer's own running. That's the same shape as my own hardest boundary,
+`hands_on` vs `opinion`, where the question is whether a personal result is
+there and whether it's doing the work.
+
+That matters for Milestone 4. The second rater agreed with me 30 / 30 on
+someone else's written rules. But on my own taxonomy, the two pre-labelling
+passes behind `labels.csv` split on 44 of the 700 pool posts, and all 44 of
+those are in my final 248. The biggest group was `hands_on` vs `opinion` with
+17, then `factual` vs `opinion` with 14 (from `data/prelabel_passes.csv`). So
+the rules can be applied consistently, but my own boundary between personal
+results and plain opinion was the least settled part of my training data.
 
 
 
