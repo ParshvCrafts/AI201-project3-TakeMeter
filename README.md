@@ -408,6 +408,27 @@ was done with Claude as my coding assistant, working from my definitions and
 decision rules. 19 of the 20 cold rows were also labelled by Claude, at my
 request. Every row's note says how it was labelled.
 
+**Unit 6**
+
+- *Spotting the pattern in my errors:* I had Claude add up the confusion
+  matrices across all three seeds and cross-check them against
+  `data/prelabel_passes.csv`. That's where the link came from: the pair the
+  model gets wrong most after the fix (`hands_on` → `opinion`) is also the
+  pair my two pre-labelling passes disagreed on most (17 of 44). I wouldn't
+  have looked at the pre-label file again on my own. It turned out to be the
+  best evidence I have that criterion 5 is a labelling problem.
+- *Explaining the baseline:* When my definitions made the baseline *worse*
+  than bare label names, I asked why. The answer was in `baseline.py`: it puts
+  each definition after "This post is", which turns my `question` definition
+  into a broken sentence. I kept my definitions anyway (explained above).
+- *Staff-set labels:* `my_staff_labels.csv` was labelled by Claude under
+  `data/staff_taxonomy.md`, at my direction. The stand-in second rater was a
+  separate Claude session that saw only the taxonomy and the posts.
+- *Running the notebook:* `run_seeds.py` runs the notebook's own sections 1-3,
+  6 and 7 from the command line, skipping the unit 5 training call and the
+  unit 5 file writes so `results.json` and `test_split.csv` never change.
+  Claude wrote it with me.
+
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 5.
@@ -738,24 +759,83 @@ results and plain opinion was the least settled part of my training data.
 
 ## The Improvement
 
-**What I changed:**
+**What I changed:** One training setting: `EPOCHS = 3` → `EPOCHS = 10` in
+section 2 of the notebook. Nothing else moved: same labels, same seeds (so the
+same three splits), same learning rate, batch size and device. Section 6 ran
+with `RUN_LABEL = "after"` and wrote `results_three_seeds_after.json`.
 
-**Which diagnosis pointed at it:**
+**Which diagnosis pointed at it:** The main cause above. Every seed collapsed
+into `opinion` after only 33 updates, and the unit 5 run had shown validation
+loss still falling at epoch 10. I picked this over the other two options on
+purpose:
+- *Relabelling one boundary:* the before-matrix had no pair to fix. All four
+  labels drained into one column.
+- *30 more examples of my thinnest label:* three labels were ignored equally,
+  so more data for one of them wouldn't stop the collapse.
+
+I used 10 epochs rather than trying several values because 10 was already
+tested in unit 5 without overfitting. Trying 5, 10 and 20 and keeping the best
+would mean picking my setting by looking at the test split.
 
 ### Run Log — After
 
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | ≥ 0.60 | 0.526 | 0.658 | 0.711 | MISSED |
+| 2. Every label F1 (lowest shown) | ≥ 0.45 | 0.167 (`factual`) | 0.400 (`hands_on`, `factual`) | 0.615 (`hands_on`) | MISSED |
+| 3. F1 on `question` | ≥ 0.80 | 0.706 | 0.762 | 0.824 | MISSED |
+| 4. Most-confident third minus least-confident third | ≥ +0.15 | +0.500 (0.750 vs 0.250) | +0.333 (0.917 vs 0.583) | +0.333 (0.833 vs 0.500) | MET |
+| 5. Real `hands_on` called `opinion` | ≤ 30% | 38% (3/8) | 25% (2/8) | 50% (4/8) | MISSED |
 
-**Did it help, and how do I know:**
+Side by side, before → after:
 
-<!-- If it didn't, say so. Relabelling that didn't help is a genuinely
-     interesting result and earns full credit. -->
+| Criterion | Seed 42 | Seed 7 | Seed 2024 | Verdict |
+|---|---|---|---|---|
+| 1. Accuracy | 0.368 → 0.526 | 0.342 → 0.658 | 0.368 → 0.711 | MISSED → MISSED |
+| 2. Lowest label F1 | 0.000 → 0.167 | 0.000 → 0.400 | 0.000 → 0.615 | MISSED → MISSED |
+| 3. `question` F1 | 0.000 → 0.706 | 0.000 → 0.762 | 0.000 → 0.824 | MISSED → MISSED |
+| 4. Confidence gap | +0.500 → +0.500 | +0.500 → +0.333 | +0.667 → +0.333 | MET → MET |
+| 5. `hands_on` → `opinion` | 88% → 38% | 100% → 25% | 100% → 50% | MISSED → MISSED |
+
+The spread after (section 6):
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.526 | 0.658 | 0.711 | 0.184 |
+| Macro F1 | 0.485 | 0.590 | 0.715 | 0.230 |
+| F1 — `hands_on` | 0.400 | 0.400 | 0.615 | 0.215 |
+| F1 — `factual` | 0.167 | 0.400 | 0.778 | 0.611 |
+| F1 — `opinion` | 0.667 | 0.800 | 0.643 | 0.157 |
+| F1 — `question` | 0.706 | 0.762 | 0.824 | 0.118 |
+
+Confusion matrix after, all three seeds added up (114 posts):
+
+| true \ predicted | hands_on | factual | opinion | question |
+|---|---|---|---|---|
+| **hands_on** | 10 | 3 | 9 | 2 |
+| **factual** | 5 | 11 | 7 | 4 |
+| **opinion** | 2 | 3 | 30 | 4 |
+| **question** | 2 | 1 | 0 | 21 |
+
+**Did it help, and how do I know:** Yes, a lot, but not enough to flip a
+single verdict. Every number I measure moved the right way on every seed:
+accuracy went up by 0.16 to 0.34, `question` went from 0.00 to 0.71-0.82,
+and `hands_on` lost to `opinion` dropped from 88-100% to 25-50%. The model
+now predicts all four labels. Seed 7 now passes criteria 1 and 5, and seed
+2024 passes 1, 2 and 3. Each criterion still fails on at least one seed,
+though, so all four stay MISSED, and that's the rule I signed up for.
+
+Two new things showed up that the before-run was hiding:
+- **The measure is now unstable.** Accuracy swings 0.184 across seeds and
+  `factual` F1 swings from 0.167 to 0.778. With 8 or 9 posts per label in
+  test, one post is worth about 0.06 of F1, so seed 42 vs seed 2024 is a few
+  posts landing differently. The before-run looked stable only because it
+  always gave the same answer. Now that the model is guessing for real, my
+  38-post test split is too small to pin a number down.
+- **Criterion 4 now means something.** Before, it passed because of the
+  collapse. Now, with four labels being predicted, the confident third is
+  still right 75-92% of the time vs 25-58% for the unsure third. That's the
+  version of MET I actually wanted.
 
 
 
@@ -765,11 +845,50 @@ results and plain opinion was the least settled part of my training data.
 
 <!-- For each criterion still missed: what you'd do, and why you stopped. -->
 
+**1. Accuracy ≥ 0.60 (seed 42 at 0.526).** Two of three seeds clear it. I'd
+fix the `factual` → `hands_on` leak first (see criterion 2), since that's
+where seed 42 loses most of its posts. I'd also get a bigger test split before
+trusting any single number: a 0.184 spread means I can't tell a real
+improvement from a lucky split. I stopped because the brief allows one
+change, and mixing a second one in would make both impossible to read.
 
+**2. Every label F1 ≥ 0.45 (`factual` at 0.167 on seed 42, 0.400 on seed
+7).** The after-matrix shows 5 of 9 `factual` posts on seed 42 called
+`hands_on`, and 0 the other way. Both labels are full of model names and
+numbers. The only difference is whether the number came from the writer's own
+machine or from outside, and DistilBERT on 39 training examples hasn't picked
+that up. Next I'd add about 30 more `factual` posts that look as much like
+`hands_on` as possible (same models, same hardware words), so the source of
+the number is the only thing separating them. I stopped for the same
+one-change reason.
+
+**3. `question` F1 ≥ 0.80 (0.706 and 0.762).** Close. Recall is fine: across the
+three seeds only 3 real questions were missed (2 called `hands_on`, 1
+`factual`). Precision is the problem: 10 other posts got called `question`
+(2 `hands_on`, 4 `factual`, 4 `opinion`). My rule
+says rhetorical questions are `opinion`, so a question mark alone isn't
+enough. I'd look at those specific posts before changing anything, because
+with 8 test posts this target sits about one post away on two of the seeds. I
+haven't done that yet.
+
+**5. `hands_on` → `opinion` ≤ 30% (38% and 50%).** This is the one I
+predicted would stay broken, and it did: 9 `hands_on` posts went to
+`opinion` across the seeds, and only 2 went the other way. That direction
+lines up with my labelling evidence. `hands_on` vs `opinion` is the pair my
+two pre-labelling passes split on most (17 of 44). So the fix I'd try is the
+relabelling one: re-read every `hands_on` and `opinion` row against the "is
+there a concrete result someone could check" rule, apply it once, and count
+how many rows change. I stopped because the brief allows one change and the
+diagnosis said training came first. Now that the model trains, this is next.
 
 **The gap between what I meant my labels to capture and what the model
-learned:**
-<!-- Two sentences. Your confusion matrix is the evidence. -->
+learned:** I meant `hands_on` and `factual` to be split by *where the number
+came from* (the writer's own machine vs an outside source), but the matrix
+shows the model splitting them by *whether there are numbers at all*: 5
+`factual` posts went to `hands_on` and 9 `hands_on` posts went to `opinion`
+when the result was described casually. In other words, it learned the
+surface of my labels (numbers, question marks, tone) and not the source of
+the evidence, which is the one thing my definitions are actually about.
 
 
 
