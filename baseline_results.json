@@ -1,0 +1,230 @@
+{
+  "model": "facebook/bart-large-mnli",
+  "n": 38,
+  "seed": 42,
+  "held_out": true,
+  "used_definitions": true,
+  "scores": {
+    "n": 38,
+    "accuracy": 0.3157894736842105,
+    "f1_macro": 0.25212418300653594,
+    "per_label": {
+      "factual": {
+        "precision": 0.25925925925925924,
+        "recall": 0.7777777777777778,
+        "f1": 0.3888888888888889,
+        "support": 9
+      },
+      "hands_on": {
+        "precision": 0.3333333333333333,
+        "recall": 0.375,
+        "f1": 0.35294117647058826,
+        "support": 8
+      },
+      "opinion": {
+        "precision": 1.0,
+        "recall": 0.15384615384615385,
+        "f1": 0.2666666666666667,
+        "support": 13
+      },
+      "question": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      }
+    }
+  },
+  "predictions": [
+    {
+      "text": "Now we can, using the 'lms server' command. Although I have been using the UI since I still in an experimenting phase.",
+      "gold": "factual",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "The old functionality in the chat UI only transcribed text, if you gave it an image of something other than a document it wouldn't be able to describe it. From the other user's post above it looks like it's changed?",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "I just hate not being able to revert file changes and all plugins that implement this mess with your git repo I just dropped pi after that",
+      "gold": "hands_on",
+      "predicted": "factual"
+    },
+    {
+      "text": "Idts, their own docs say they use fine tuned local models but I don\u2019t think they allow BYOLM, might be worth asking their support",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "Very cool; thank you for releasing it! Any way to make it work in comfy?",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "Did you redownload the GGUF after the fix, or alternatively override the parameter that was set wrong? Also, low temperature will tend to cause looping.",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "I'd say benchmarks are as hard as building the training set if not more.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "Pretty sure models return an encrypted payload representing the reasoning that gets passed back and forth. I don't know much about it but it may be a place to start.",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "Wait so this does this exactly.. \" the subset vLLM supports natively (NVFP4 + FP8 W8A8 + BF16) and requires zero vLLM changes.\" So it's a hybrid quant vs nvidia model opt ?",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "i guess i will get 8-13 t/s if you have a proper setup for my hardware guide me cause im still newbie (using llama.cpp with cuda 13)",
+      "gold": "question",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "Some of these benchmarks are sus. I haven't played with your package yet but the rankings/memory usage/speed of a lot of these are nowhere near my experience. Docling requires a minimum of 500MB disk space. Markitdown just uses pdfminer which is nothing special and shouldn't be getting 99.5% accuracy. Coldstart of some of these is super off. There's several other issues that just don't match my experience make this super sus.",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "With what GPU? With 4 concurrent 128k sessions I see about 90 tg on each and that's sort of the worst case scenario. Normally, single thread spikes up to 250, but usually stays at about 130+",
+      "gold": "hands_on",
+      "predicted": "factual"
+    },
+    {
+      "text": "Thanks I know. But its more about the thinking abuse and back and fort *inconsistencies*",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "Have you tried LM Studio? I've had good luck mixing cards with that.",
+      "gold": "opinion",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "Moving the draft argmax out of the CPU synchronization loop into the GPU graph is a legit optimization for speculative decoding\u2014that CPU-GPU context sync in the hot loop is a well-known bottleneck for dflash. Thanks for linking the PR! Form/AI-text controversy aside, eliminating CPU sync points for drafters is definitely the right technical direction for llama.cpp.",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "A.k.a. \"lobotomized model remembers nothing except its safety training\". It sees \"war\" and gets triggered into denial.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "Difficult to say. When you're trying models in an agent, most of the time you're pissed off when they're stuck or when they loop forever. Here that didn't happen. The rest is only a matter of feeling, like you have when you meet certain people. One thing I noticed is that they don't produce too much thinking, which is appreciable when you have a finite time for a task. If you disable reasoning they \"think\" through the agent but just as needed. Other than that it's hard to say. Both deserve to be tested.",
+      "gold": "opinion",
+      "predicted": "opinion"
+    },
+    {
+      "text": "Are you sure you have tried that build I linked? That build was built only 6 hours ago. It was not working until that build but with it the logs are now saying that attn-rot is enabled.",
+      "gold": "hands_on",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "That's what AI generated content is only capable of, generating tons of low quality very short form content. Even then, there is growing fatigue towards such \"AI slop\" and most people will get tired of it eventually. It cannot generate even a soap opera, current models are incapable of generating consistent environment and characters and are limited to few second clips, and probably won't get any better at that. Darren Aronofsky tried making a \"movie\" in that format and it turned out horribly.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "Absolutely, we're using this in our pilot product since 3.5 release, And since it's basically an EAGLE (lossless) architecture fused with the main model and trained as the part of the main model, it's totally legit",
+      "gold": "factual",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "Because his cards don't support nvlink and hence (especially over pcie 4.0), tensor parallelism will be shite compared to PP.",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "the 3.5 family is in there, did you use the search bar?",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "USA doesn't have financial regulators, so anything goes. It's why Nvidia can \"invest\" 100 billion into startups, counted as investment, that will use that money to buy and rent Nvidia, so it'll get counted on the revenue side of their equations.",
+      "gold": "opinion",
+      "predicted": "opinion"
+    },
+    {
+      "text": "I use docking (tesseract ocr). Then a different llm to process the extracted data.",
+      "gold": "opinion",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "u/Digger412 Offtopic : Any plans for DeepSeek-V4-Flash-0731? Thanks for the Qwen3.8-Flash-Next GGUF already.",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "im trying on it. it works on mlx and the qwen 3.5 model i have but havent tried it with anything else",
+      "gold": "hands_on",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "Nice detailed experience. Running on 4090 + DDR5 is solid. Quick question \u2014 what tokens/sec are you seeing at different quant levels, and did you try any vLLM/exllama or speculative decoding tweaks? I\u2019m experimenting with similar consumer setups and always looking for ways to reduce latency without upgrading hardware",
+      "gold": "question",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "seriously I'm deleting any traces from shell history for security by obscurity. I've got a passwordless ssh key for that gold berg, now rethinking to have -i, separate backup key for that.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "The README mentions a MacBook Pro. Is that a unified memory machine with a RAM speed that\u2019s 10x of what non-MacBook laptops have?",
+      "gold": "question",
+      "predicted": "factual"
+    },
+    {
+      "text": "A 5000 pro Blackwell. But the answer is simple, it's 2.5x faster with concurrency of 128. I'm using Qwen for coding so I can only expect a 1.03x gain...",
+      "gold": "hands_on",
+      "predicted": "factual"
+    },
+    {
+      "text": "NVLink is better if you're only comparing bandwidth from what I've read. I have a 3090ti and a 3090 and NVLink slots do not align on the GPUs. I tried the P2P and while simple P2P tests passed, vLLM didn't work.",
+      "gold": "hands_on",
+      "predicted": "factual"
+    },
+    {
+      "text": "MOE need to fit into ram(maybe ram+vram, not sure) and the A3B so 3b need to fit into vram for decent speed, the more u can/do fit into vram the faster it gets.",
+      "gold": "factual",
+      "predicted": "factual"
+    },
+    {
+      "text": "that many total params would be overfitting and useless for development - MoE for sure with strong router and solid experts as needed is best for coder models.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "I also did such tests for a long writing. Q8 cache was degrading output quality and even output was shorter about 10-15%",
+      "gold": "hands_on",
+      "predicted": "hands_on"
+    },
+    {
+      "text": "I thought ktransformers was nvidia only. I'd try anything that's performant, even if it's clunky. Maybe that guy claiming to have written his own numa engine releases it after he abandoned the PR.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "In my experience when it comes to browser use, MCP tool calling succeeds more than the CLI.",
+      "gold": "opinion",
+      "predicted": "factual"
+    },
+    {
+      "text": "40tps vs 14 with roughly equivalent intelligence means I rarely fire up GLM unless I need a second opinion",
+      "gold": "hands_on",
+      "predicted": "factual"
+    },
+    {
+      "text": "And a bonus - it will be able to mix them and create new stories: \"Harry Potter and aliens\" :)",
+      "gold": "opinion",
+      "predicted": "factual"
+    }
+  ]
+}
